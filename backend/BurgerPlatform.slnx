@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Burger.API/Burger.API.csproj" />
+    <Project Path="src/Burger.Application/Burger.Application.csproj" />
+    <Project Path="src/Burger.Domain/Burger.Domain.csproj" />
+    <Project Path="src/Burger.Infrastructure/Burger.Infrastructure.csproj" />
+  </Folder>
+</Solution>
