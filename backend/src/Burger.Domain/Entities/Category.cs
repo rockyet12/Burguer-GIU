@@ -6,41 +6,69 @@ public class Category
     public string Name { get; private set; }
     public string Description { get; private set; }
     public bool IsActive { get; private set; }
+    public int DisplayOrder { get; private set; }
 
-    public Category(string name, string description)
+    public Category(string name, string description, int displayOrder = 0)
     {
-        if (string.IsNullOrWhiteSpace(name))
-            throw new ArgumentException("Category name cannot be empty.", nameof(name));
-
-        if (string.IsNullOrWhiteSpace(description))
-            throw new ArgumentException(
-                "Category description cannot be empty.",
-                nameof(description)
-            );
+        ValidateName(name);
+        ValidateDescription(description);
+        ValidateDisplayOrder(displayOrder);
 
         Id = Guid.NewGuid();
-        Name = name;
-        Description = description;
+        Name = name.Trim();
+        Description = description.Trim();
+        DisplayOrder = displayOrder;
+
         IsActive = true;
     }
 
     public void UpdateInformation(string name, string description)
     {
-        if (string.IsNullOrWhiteSpace(name))
-            throw new ArgumentException("Category name be empty.", nameof(name));
+        ValidateName(name);
+        ValidateDescription(description);
 
+        Name = name.Trim();
+        Description = description.Trim();
+    }
+
+    public void ChangeDisplayOrder(int newDisplayOrder)
+    {
+        ValidateDisplayOrder(newDisplayOrder);
+
+        DisplayOrder = newDisplayOrder;
+    }
+
+    public void Activate()
+    {
+        IsActive = true;
+    }
+
+    public void Deactivate()
+    {
+        IsActive = false;
+    }
+
+    private static void ValidateName(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Category name cannot be empty.", nameof(name));
+    }
+
+    private static void ValidateDescription(string description)
+    {
         if (string.IsNullOrWhiteSpace(description))
             throw new ArgumentException(
                 "Category description cannot be empty.",
                 nameof(description)
             );
-
-        Name = name;
-        Description = description;
     }
 
-    public void SetActive(bool isActive)
+    private static void ValidateDisplayOrder(int displayOrder)
     {
-        IsActive = isActive;
+        if (displayOrder < 0)
+            throw new ArgumentOutOfRangeException(
+                nameof(displayOrder),
+                "Display order cannot be negative."
+            );
     }
 }
