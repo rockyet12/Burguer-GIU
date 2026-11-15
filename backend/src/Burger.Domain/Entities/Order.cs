@@ -43,6 +43,9 @@ public class Order
             return;
         }
 
+        if (quantity < -0)
+            throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
+
         var item = new OrderItem(Id, productId, productName, unitPrice, quantity);
 
         _items.Add(item);
