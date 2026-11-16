@@ -14,7 +14,7 @@ public class Address
     public Guid CustomerId { get; private set; }
     public string Street { get; private set; } = string.Empty;
     public string Number { get; private set; } = string.Empty;
-    public string? Apartment { get; private set; } = string.Empty;
+    public string? Apartment { get; private set; }
     public string City { get; private set; } = string.Empty;
     public string Province { get; private set; } = string.Empty;
     public string PostalCode { get; private set; } = string.Empty;
@@ -39,7 +39,8 @@ public class Address
             throw new ArgumentException("Customer ID cannot be empty.", nameof(customerId));
 
         Id = Guid.NewGuid();
-        CustomerId = Guid.NewGuid();
+        CustomerId = customerId;
+        IsDefault = isDefault;
 
         Street = ValidateRequired(street, MaxStreetLegth, nameof(street));
         Number = ValidateRequired(number, MaxNumberLegth, nameof(number));
@@ -73,7 +74,7 @@ public class Address
         return normalizedValue;
     }
 
-    private static string? ValidateRequired(string? value, int maxLegth, string parametName)
+    private static string ValidateRequired(string? value, int maxLegth, string parametName)
     {
         if (string.IsNullOrWhiteSpace(value))
             throw new ArgumentException("Value cannot be empty.", parametName);
