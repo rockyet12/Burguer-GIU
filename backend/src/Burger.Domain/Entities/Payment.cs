@@ -10,7 +10,7 @@ public class Payment
     public PaymentMethod Method { get; private set; }
     public PaymentStatus Status { get; private set; }
     public DateTime CreatedAt { get; private set; }
-    public DateTime? UpdateAt { get; private set; }
+    public DateTime? UpdatedAt { get; private set; }
 
     private Payment() { }
 
@@ -26,11 +26,52 @@ public class Payment
             throw new ArgumentException("Invalid method.", nameof(method));
 
         Id = Guid.NewGuid();
-        orderId = orderId;
+        OrderId = orderId;
         Amount = amount;
         Method = method;
         Status = PaymentStatus.Pending;
         CreatedAt = DateTime.UtcNow;
-        UpdateAt = null;
+        UpdatedAt = null;
+    }
+
+    public void MarkAsProcessing()
+    {
+        EnsureStatus(PaymentStatus.Pending);
+        Status = PaymentStatus.Proccesing;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void Approve()
+    {
+        if (Status != PaymentStatus.Pending && Status != PaymentStatus.Proccesing)
+        {
+            throw new InvalidOperationException(
+                "Only pending or processing payments can be Aproved."
+            );
+        }
+        Status = PaymentStatus.Approved;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void Cancel()
+    {
+        EnsureStatus(PaymentStatus.Pending);
+        Status = PaymentStatus.Cancelled;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    private void EnsureStatus(params PaymentStatus[] allowedStatuses)
+    {
+        if (!allowedStatuses.Contains(Status))
+        {
+            throw new InvalidOperationException($"Payment cannot transitation from {Status}.");
+        }
+    }
+
+    public void Reject()
+    {
+        EnsureStatus(PaymentStatus.Pending, PaymentStatus.Proccesing);
+        Status = PaymentStatus.Rejected;
+        UpdatedAt = DateTime.UtcNow;
     }
 }
