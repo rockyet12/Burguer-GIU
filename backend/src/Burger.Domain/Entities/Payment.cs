@@ -4,6 +4,8 @@ namespace Burger.Domain.Entities;
 
 public class Payment
 {
+    private readonly List<PaymentHistory> _history = [];
+    public IReadOnlyCollection<PaymentHistory> History => _history.AsReadOnly();
     public Guid Id { get; private set; }
     public Guid OrderId { get; private set; }
     public decimal Amount { get; private set; }
@@ -32,32 +34,28 @@ public class Payment
         Status = PaymentStatus.Pending;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = null;
+
+        _history.Add(new PaymentHistory(Id, null, PaymentStatus.Pending, "Payment created."));
     }
 
     public void MarkAsProcessing()
     {
         EnsureStatus(PaymentStatus.Pending);
-        Status = PaymentStatus.Proccesing;
-        UpdatedAt = DateTime.UtcNow;
+
+        ChangeStatus(PaymentStatus.Pending, "Payment processing started.");
     }
 
     public void Approve()
     {
-        if (Status != PaymentStatus.Pending && Status != PaymentStatus.Proccesing)
-        {
-            throw new InvalidOperationException(
-                "Only pending or processing payments can be Aproved."
-            );
-        }
         Status = PaymentStatus.Approved;
-        UpdatedAt = DateTime.UtcNow;
+
+        ChangeStatus(PaymentStatus.Approved, "Payment Approved.");
     }
 
     public void Cancel()
     {
         EnsureStatus(PaymentStatus.Pending);
-        Status = PaymentStatus.Cancelled;
-        UpdatedAt = DateTime.UtcNow;
+        ChangeStatus(PaymentStatus.Cancelled, "Payment Cancelled.");
     }
 
     private void EnsureStatus(params PaymentStatus[] allowedStatuses)
@@ -73,5 +71,14 @@ public class Payment
         EnsureStatus(PaymentStatus.Pending, PaymentStatus.Proccesing);
         Status = PaymentStatus.Rejected;
         UpdatedAt = DateTime.UtcNow;
+    }
+
+    private void ChangeStatus(PaymentStatus newStatus, string? description)
+    {
+        var previousStatus = Status;
+        Status = newStatus;
+        UpdatedAt = DateTime.UtcNow;
+
+        _history.Add(new PaymentHistory(Id, previousStatus, newStatus, description));
     }
 }
