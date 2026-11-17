@@ -34,14 +34,38 @@ public class PaymentTests
         var payment = new Payment(orderId, 15000m, PaymentMethod.Cash);
 
         payment.MarkAsProcessing();
-
-        Assert.Equal(PaymentStatus.Procesing, payment.Status);
+        Assert.Equal(PaymentStatus.Processing, payment.Status);
         Assert.Equal(2, payment.History.Count);
 
         var history = payment.History.Last();
 
         Assert.Equal(PaymentStatus.Pending, history.PreviousStatus);
-        Assert.Equal(PaymentStatus.Procesing, history.NewStatus);
+        Assert.Equal(PaymentStatus.Processing, history.NewStatus);
+        Assert.NotNull(payment.UpdatedAt);
+    }
+
+    [Fact]
+    public void MarkAsProcessing_WhenAlreadyProcessing_ShouldThowException()
+    {
+        var payment = new Payment(Guid.NewGuid(), 15000m, PaymentMethod.Cash);
+        payment.MarkAsProcessing();
+        Assert.Throws<InvalidOperationException>(() => payment.MarkAsProcessing());
+    }
+
+    [Fact]
+    public void Approve_ShouldUpdateStatusAndHistory()
+    {
+        var payment = new Payment(Guid.NewGuid(), 15000m, PaymentMethod.MercadoPago);
+        payment.MarkAsProcessing();
+
+        payment.Approve();
+
+        Assert.Equal(PaymentStatus.Approved, payment.Status);
+        Assert.Equal(3, payment.History.Count);
+
+        var history = payment.History.Last();
+        Assert.Equal(PaymentStatus.Processing, history.PreviousStatus);
+        Assert.Equal(PaymentStatus.Approved, history.NewStatus);
         Assert.NotNull(payment.UpdatedAt);
     }
 }
