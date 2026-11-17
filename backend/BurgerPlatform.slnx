@@ -5,4 +5,7 @@
     <Project Path="src/Burger.Domain/Burger.Domain.csproj" />
     <Project Path="src/Burger.Infrastructure/Burger.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Burger.Domain.Tests/Burger.Domain.Tests.csproj" />
+  </Folder>
 </Solution>

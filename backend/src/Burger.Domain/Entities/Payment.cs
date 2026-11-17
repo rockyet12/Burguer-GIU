@@ -42,14 +42,13 @@ public class Payment
     {
         EnsureStatus(PaymentStatus.Pending);
 
-        ChangeStatus(PaymentStatus.Pending, "Payment processing started.");
+        ChangeStatus(PaymentStatus.Procesing, "Payment procesing started.");
     }
 
     public void Approve()
     {
-        Status = PaymentStatus.Approved;
-
-        ChangeStatus(PaymentStatus.Approved, "Payment Approved.");
+        EnsureStatus(PaymentStatus.Pending, PaymentStatus.Procesing);
+        ChangeStatus(PaymentStatus.Approved, "Payment approved.");
     }
 
     public void Cancel()
@@ -68,9 +67,8 @@ public class Payment
 
     public void Reject()
     {
-        EnsureStatus(PaymentStatus.Pending, PaymentStatus.Proccesing);
-        Status = PaymentStatus.Rejected;
-        UpdatedAt = DateTime.UtcNow;
+        EnsureStatus(PaymentStatus.Pending, PaymentStatus.Procesing);
+        ChangeStatus(PaymentStatus.Rejected, "Payment rejected.");
     }
 
     private void ChangeStatus(PaymentStatus newStatus, string? description)
