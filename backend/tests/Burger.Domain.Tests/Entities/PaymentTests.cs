@@ -50,7 +50,12 @@ public class PaymentTests
     {
         var payment = PaymentFactory.CreateCashPayment();
         payment.MarkAsProcessing();
+
+        var historyCount = payment.History.Count;
+
         Assert.Throws<InvalidOperationException>(() => payment.MarkAsProcessing());
+        Assert.Equal(PaymentStatus.Processing, payment.Status);
+        Assert.Equal(historyCount, payment.History.Count);
     }
 
     [Fact]

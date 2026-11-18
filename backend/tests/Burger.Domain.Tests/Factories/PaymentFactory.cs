@@ -16,4 +16,14 @@ internal static class PaymentFactory
     {
         return new Payment(Guid.NewGuid(), DefaultAmount, PaymentMethod.MercadoPago);
     }
+
+    public static void AssertPaymentUnchanged(
+        Payment payment,
+        PaymentStatus expectedStatus,
+        int expectedHistoryCount
+    )
+    {
+        Assert.Equal(expectedStatus, payment.Status);
+        Assert.Equal(expectedHistoryCount, payment.History.Count);
+    }
 }
