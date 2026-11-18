@@ -79,4 +79,23 @@ public class PaymentTests
 
         Assert.Throws<InvalidOperationException>(() => payment.Cancel());
     }
+
+    [Fact]
+    public void Reject_ShouldUpdateStatusAndHistory()
+    {
+        var payment = new Payment(Guid.NewGuid(), 15000m, PaymentMethod.MercadoPago);
+
+        payment.MarkAsProcessing();
+
+        payment.Reject();
+
+        Assert.Equal(PaymentStatus.Rejected, payment.Status);
+        Assert.Equal(3, payment.History.Count);
+
+        var history = payment.History.Last();
+
+        Assert.Equal(PaymentStatus.Processing, history.PreviousStatus);
+        Assert.Equal(PaymentStatus.Rejected, history.NewStatus);
+        Assert.NotNull(payment.UpdatedAt);
+    }
 }
