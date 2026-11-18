@@ -1,5 +1,6 @@
 ﻿using Burger.Domain.Entities;
 using Burger.Domain.Enums;
+using Burger.Domain.Tests.Factories;
 
 namespace Burger.Domain.Tests.Entities;
 
@@ -31,7 +32,7 @@ public class PaymentTests
     public void MarkAsProcessing_ShouldUpdateStatusAndHistory()
     {
         var orderId = Guid.NewGuid();
-        var payment = new Payment(orderId, 15000m, PaymentMethod.Cash);
+        var payment = PaymentFactory.CreateCashPayment();
 
         payment.MarkAsProcessing();
         Assert.Equal(PaymentStatus.Processing, payment.Status);
@@ -47,7 +48,7 @@ public class PaymentTests
     [Fact]
     public void MarkAsProcessing_WhenAlreadyProcessing_ShouldThowException()
     {
-        var payment = new Payment(Guid.NewGuid(), 15000m, PaymentMethod.Cash);
+        var payment = PaymentFactory.CreateCashPayment();
         payment.MarkAsProcessing();
         Assert.Throws<InvalidOperationException>(() => payment.MarkAsProcessing());
     }
@@ -55,7 +56,7 @@ public class PaymentTests
     [Fact]
     public void Approve_ShouldUpdateStatusAndHistory()
     {
-        var payment = new Payment(Guid.NewGuid(), 15000m, PaymentMethod.MercadoPago);
+        var payment = PaymentFactory.CreateMpPayment();
         payment.MarkAsProcessing();
 
         payment.Approve();
@@ -72,7 +73,7 @@ public class PaymentTests
     [Fact]
     public void Cancel_WhenPaymentIsApproved_ShouldThowException()
     {
-        var payment = new Payment(Guid.NewGuid(), 15000m, PaymentMethod.MercadoPago);
+        var payment = PaymentFactory.CreateMpPayment();
 
         payment.MarkAsProcessing();
         payment.Approve();
@@ -83,7 +84,7 @@ public class PaymentTests
     [Fact]
     public void Reject_ShouldUpdateStatusAndHistory()
     {
-        var payment = new Payment(Guid.NewGuid(), 15000m, PaymentMethod.MercadoPago);
+        var payment = PaymentFactory.CreateMpPayment();
 
         payment.MarkAsProcessing();
 
@@ -119,5 +120,89 @@ public class PaymentTests
     public void CreatePayment_whithEmptyOrderId_ShouldThrowException()
     {
         Assert.Throws<ArgumentException>(() => new Payment(Guid.Empty, 15000m, PaymentMethod.Cash));
+    }
+
+    [Fact]
+    public void CreatePayment_WithInvalidMethod_ShouldThrowException()
+    {
+        var invalidMethod = (PaymentMethod)99;
+
+        Assert.Throws<ArgumentException>(() => new Payment(Guid.NewGuid(), 15000m, invalidMethod));
+    }
+
+    [Fact]
+    public void Approve_WhenPaymentIsCancelled_ShouldThrowException()
+    {
+        var payment = PaymentFactory.CreateCashPayment();
+        payment.Cancel();
+
+        Assert.Throws<InvalidOperationException>(() => payment.Approve());
+    }
+
+    [Fact]
+    public void Reject_WhenPaymentIsApproved_ShouldThowException()
+    {
+        //Arrange
+        var payment = PaymentFactory.CreateMpPayment();
+        payment.Approve();
+
+        var historyCount = payment.History.Count;
+
+        //Act y Assert
+        Assert.Throws<InvalidOperationException>(() => payment.Reject());
+
+        //el pago debe permanecer sin modificacinoes
+        Assert.Equal(PaymentStatus.Approved, payment.Status);
+        Assert.Equal(historyCount, payment.History.Count);
+    }
+
+    [Fact]
+    public void Cancel_WhenPaymentIsProcessing_ShouldThowException()
+    {
+        var payment = PaymentFactory.CreateMpPayment();
+        payment.MarkAsProcessing();
+
+        Assert.Throws<InvalidOperationException>(() => payment.Cancel());
+    }
+
+    [Fact]
+    public void History_shouldNotAllowExternalModification()
+    {
+        var payment = PaymentFactory.CreateCashPayment();
+
+        var history = Assert.IsAssignableFrom<ICollection<PaymentHistory>>(payment.History);
+        Assert.True(history.IsReadOnly);
+        Assert.Throws<NotSupportedException>(() => history.Add(payment.History.First()));
+    }
+
+    [Fact]
+    public void Approved_ShouldPreserveCompleteHistory()
+    {
+        //Arrange
+        var payment = PaymentFactory.CreateMpPayment();
+
+        //Act
+        payment.MarkAsProcessing();
+        payment.Approve();
+
+        //Assert
+        var history = payment.History.ToList();
+
+        Assert.Equal(3, history.Count);
+
+        //primer Registro : creacion
+        Assert.Null(history[0].PreviousStatus);
+        Assert.Equal(PaymentStatus.Pending, history[0].NewStatus);
+
+        //segundo registro: procesamiento
+        Assert.Equal(PaymentStatus.Pending, history[1].PreviousStatus);
+        Assert.Equal(PaymentStatus.Processing, history[1].NewStatus);
+
+        //tercer registro : aprobacion
+        Assert.Equal(PaymentStatus.Processing, history[2].PreviousStatus);
+        Assert.Equal(PaymentStatus.Approved, history[2].NewStatus);
+
+        //Todos los registros pertenecen al mismo pago
+        Assert.All(history, entry => Assert.Equal(payment.Id, entry.PaymentId));
     }
 }
