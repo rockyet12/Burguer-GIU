@@ -1,7 +1,7 @@
 ﻿using Burger.Domain.Entities;
 using Burger.Domain.Enums;
 
-namespace Burger.Domain.Tests;
+namespace Burger.Domain.Tests.Entities;
 
 public class PaymentTests
 {
@@ -97,5 +97,27 @@ public class PaymentTests
         Assert.Equal(PaymentStatus.Processing, history.PreviousStatus);
         Assert.Equal(PaymentStatus.Rejected, history.NewStatus);
         Assert.NotNull(payment.UpdatedAt);
+    }
+
+    [Fact]
+    public void CreatePayment_WhithZeroAmount_ShouldThrowException()
+    {
+        var orderId = Guid.NewGuid();
+
+        Assert.Throws<ArgumentException>(() => new Payment(orderId, 0m, PaymentMethod.Cash));
+    }
+
+    [Fact]
+    public void CreatePayment_WithNegativeAmount_ShouldThrowException()
+    {
+        var orderId = Guid.NewGuid();
+
+        Assert.Throws<ArgumentException>(() => new Payment(orderId, -100m, PaymentMethod.Cash));
+    }
+
+    [Fact]
+    public void CreatePayment_whithEmptyOrderId_ShouldThrowException()
+    {
+        Assert.Throws<ArgumentException>(() => new Payment(Guid.Empty, 15000m, PaymentMethod.Cash));
     }
 }
