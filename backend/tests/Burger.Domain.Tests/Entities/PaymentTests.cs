@@ -1,6 +1,7 @@
 ﻿using Burger.Domain.Entities;
 using Burger.Domain.Enums;
 using Burger.Domain.Tests.Factories;
+using Burger.Domain.Tests.Helpers;
 
 namespace Burger.Domain.Tests.Entities;
 
@@ -83,7 +84,9 @@ public class PaymentTests
         payment.MarkAsProcessing();
         payment.Approve();
 
+        var historyCount = payment.History.Count;
         Assert.Throws<InvalidOperationException>(() => payment.Cancel());
+        PaymentAssertions.AssertUnchanged(payment, PaymentStatus.Approved, historyCount);
     }
 
     [Fact]
