@@ -85,4 +85,43 @@ public class Address
             throw new ArgumentException("Value is too long.", parametName);
         return normalizedValue;
     }
+
+    public void UpdateInformation(
+        string street,
+        string number,
+        string? apartment,
+        string city,
+        string province,
+        string postalCode,
+        string? reference
+    )
+    {
+        string normalizedStreet = ValidateRequired(street, MaxStreetLegth, nameof(street));
+        string normalizedNumber = ValidateRequired(number, MaxNumberLegth, nameof(apartment));
+        string? normalizedApartament = ValidateOptional(
+            apartment,
+            MaxApartmentLegth,
+            nameof(apartment)
+        );
+        string normalizedCity = ValidateRequired(city, MaxCityLegth, nameof(city));
+        string normalizedProvince = ValidateRequired(province, MaxProvinceLegth, nameof(province));
+        string normalizedPostalCode = ValidateRequired(
+            postalCode,
+            MaxPostalCodeLegth,
+            nameof(postalCode)
+        );
+        string? normalizedReference = ValidateOptional(
+            reference,
+            MaxReferenceLegth,
+            nameof(reference)
+        );
+
+        Street = normalizedStreet;
+        Number = normalizedNumber;
+        Apartment = normalizedApartament;
+        City = normalizedCity;
+        Province = normalizedProvince;
+        PostalCode = normalizedPostalCode;
+        Reference = normalizedReference;
+    }
 }
