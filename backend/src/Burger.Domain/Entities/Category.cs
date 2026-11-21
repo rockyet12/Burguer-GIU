@@ -2,6 +2,9 @@ namespace Burger.Domain.Entities;
 
 public class Category
 {
+    private const int MaxNameLength = 80;
+    private const int MaxDescriptionLength = 250;
+
     public Guid Id { get; private set; }
     public string Name { get; private set; }
     public string Description { get; private set; }
@@ -10,25 +13,24 @@ public class Category
 
     public Category(string name, string description, int displayOrder = 0)
     {
-        ValidateName(name);
-        ValidateDescription(description);
+        string normalizedName = ValidateName(name);
+        string normalizedDescription = ValidateName(description);
         ValidateDisplayOrder(displayOrder);
 
         Id = Guid.NewGuid();
-        Name = name.Trim();
-        Description = description.Trim();
+        Name = normalizedName;
+        Description = normalizedDescription;
         DisplayOrder = displayOrder;
-
         IsActive = true;
     }
 
     public void UpdateInformation(string name, string description)
     {
-        ValidateName(name);
-        ValidateDescription(description);
+        string normalizedName = ValidateName(name);
+        string normalizedDescription = ValidateDescription(description);
 
-        Name = name.Trim();
-        Description = description.Trim();
+        name = normalizedName;
+        description = normalizedDescription;
     }
 
     public void ChangeDisplayOrder(int newDisplayOrder)
@@ -48,19 +50,29 @@ public class Category
         IsActive = false;
     }
 
-    private static void ValidateName(string name)
+    private static string ValidateName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Category name cannot be empty.", nameof(name));
+        string normalizedName = name.Trim();
+
+        if (normalizedName.Length > MaxNameLength)
+            throw new ArgumentException("Category name is too long.", nameof(name));
+        return normalizedName;
     }
 
-    private static void ValidateDescription(string description)
+    private static string ValidateDescription(string description)
     {
         if (string.IsNullOrWhiteSpace(description))
             throw new ArgumentException(
                 "Category description cannot be empty.",
                 nameof(description)
             );
+        string normalizedDescription = description.Trim();
+
+        if (normalizedDescription.Length > MaxDescriptionLength)
+            throw new ArgumentException("Category description is too long.", nameof(description));
+        return normalizedDescription;
     }
 
     private static void ValidateDisplayOrder(int displayOrder)
