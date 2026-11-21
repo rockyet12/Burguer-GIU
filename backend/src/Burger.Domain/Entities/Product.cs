@@ -2,6 +2,9 @@ namespace Burger.Domain.Entities;
 
 public class Product
 {
+    private const int MaxNameLength = 120;
+    private const int MaxdescriptionLength = 500;
+
     public Guid Id { get; private set; }
     public string Name { get; private set; }
     public string Description { get; private set; }
@@ -19,15 +22,16 @@ public class Product
         int displayOrder = 0
     )
     {
-        ValidateName(name);
-        ValidateDescription(description);
+        string normalizedName = ValidateName(name);
+        string normalizedDescription = ValidateDescription(description);
+
         ValidatePrice(price);
         ValidateCategoryId(categoryId);
         ValidateDisplayOrder(displayOrder);
 
         Id = Guid.NewGuid();
-        Name = name.Trim();
-        Description = description.Trim();
+        Name = normalizedName;
+        Description = normalizedDescription;
         Price = price;
         CategoryId = categoryId;
         DisplayOrder = displayOrder;
@@ -38,9 +42,6 @@ public class Product
 
     public void UpdateInformation(string name, string description)
     {
-        ValidateName(name);
-        ValidateDescription(description);
-
         Name = name.Trim();
         Description = description.Trim();
     }
@@ -86,19 +87,31 @@ public class Product
         IsActive = false;
     }
 
-    private static void ValidateName(string name)
+    private static string ValidateName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Product name cannot be empty.", nameof(name));
+
+        string normalizedName = name.Trim();
+
+        if (normalizedName.Length > MaxNameLength)
+            throw new ArgumentException("Product name is too long.", nameof(name));
+        return normalizedName;
     }
 
-    private static void ValidateDescription(string description)
+    private static string ValidateDescription(string description)
     {
         if (string.IsNullOrWhiteSpace(description))
             throw new ArgumentException(
                 "Product description cannot be empty.",
                 nameof(description)
             );
+
+        string normalizedDescription = description.Trim();
+
+        if (normalizedDescription.Length > MaxdescriptionLength)
+            throw new ArgumentException("Product description is too long.", nameof(description));
+        return description;
     }
 
     private static void ValidatePrice(decimal price)
