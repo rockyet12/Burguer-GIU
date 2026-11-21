@@ -37,10 +37,15 @@ public class Customer
         string phoneNumber
     )
     {
-        FirstName = ValidateName(firstName, MaxFirstNameLength, nameof(firstName));
-        LastName = ValidateName(lastName, MaxLastNameLength, nameof(lastName));
-        Email = ValidateEmail(email);
-        PhoneNumber = NormalizePhoneNumber(phoneNumber);
+        string normlizedFirstName = ValidateName(firstName, MaxEmailLength, nameof(firstName));
+        string normalizedLastName = ValidateName(lastName, MaxLastNameLength, nameof(lastName));
+        string normalizedEmail = ValidateEmail(email);
+        string normalizePhoneNumber = NormalizePhoneNumber(phoneNumber);
+
+        FirstName = normlizedFirstName;
+        LastName = normalizedLastName;
+        Email = normalizedEmail;
+        PhoneNumber = normalizePhoneNumber;
     }
 
     private static string ValidateName(string name, int maxLength, string parameterName)
