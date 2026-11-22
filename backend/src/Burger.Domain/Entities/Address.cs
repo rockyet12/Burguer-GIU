@@ -1,3 +1,5 @@
+using Burger.Domain.Common;
+
 namespace Burger.Domain.Entities;
 
 public class Address
@@ -35,20 +37,29 @@ public class Address
         bool isDefault = false
     )
     {
-        if (customerId == Guid.Empty)
-            throw new ArgumentException("Customer ID cannot be empty.", nameof(customerId));
-
-        Id = Guid.NewGuid();
-        CustomerId = customerId;
-        IsDefault = isDefault;
-
-        Street = ValidateRequired(street, MaxStreetLegth, nameof(street));
-        Number = ValidateRequired(number, MaxNumberLegth, nameof(number));
-        Apartment = ValidateOptional(apartment, MaxApartmentLegth, nameof(apartment));
-        City = ValidateRequired(city, MaxCityLegth, nameof(city));
-        Province = ValidateRequired(province, MaxProvinceLegth, nameof(province));
-        PostalCode = ValidateRequired(postalCode, MaxPostalCodeLegth, nameof(postalCode));
-        Reference = ValidateOptional(reference, MaxReferenceLegth, nameof(reference));
+        Street = DomainValidation.ValidateRequiredText(street, MaxStreetLegth, nameof(street));
+        Number = DomainValidation.ValidateRequiredText(number, MaxNumberLegth, nameof(number));
+        Apartment = DomainValidation.ValidateOptionalText(
+            apartment,
+            MaxApartmentLegth,
+            nameof(apartment)
+        );
+        City = DomainValidation.ValidateRequiredText(city, MaxCityLegth, nameof(city));
+        Province = DomainValidation.ValidateRequiredText(
+            province,
+            MaxProvinceLegth,
+            nameof(province)
+        );
+        PostalCode = DomainValidation.ValidateRequiredText(
+            postalCode,
+            MaxPostalCodeLegth,
+            nameof(postalCode)
+        );
+        reference = DomainValidation.ValidateOptionalText(
+            reference,
+            MaxReferenceLegth,
+            nameof(reference)
+        );
     }
 
     public void MarkAsDefault()
@@ -74,18 +85,6 @@ public class Address
         return normalizedValue;
     }
 
-    private static string ValidateRequired(string? value, int maxLegth, string parametName)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            throw new ArgumentException("Value cannot be empty.", parametName);
-
-        string normalizedValue = value.Trim();
-
-        if (normalizedValue.Length > maxLegth)
-            throw new ArgumentException("Value is too long.", parametName);
-        return normalizedValue;
-    }
-
     public void UpdateInformation(
         string street,
         string number,
@@ -96,32 +95,44 @@ public class Address
         string? reference
     )
     {
-        string normalizedStreet = ValidateRequired(street, MaxStreetLegth, nameof(street));
-        string normalizedNumber = ValidateRequired(number, MaxNumberLegth, nameof(apartment));
-        string? normalizedApartament = ValidateOptional(
+        string newStreet = DomainValidation.ValidateRequiredText(
+            street,
+            MaxStreetLegth,
+            nameof(street)
+        );
+        string newNumber = DomainValidation.ValidateRequiredText(
+            number,
+            MaxNumberLegth,
+            nameof(number)
+        );
+        string? newApartment = DomainValidation.ValidateOptionalText(
             apartment,
             MaxApartmentLegth,
             nameof(apartment)
         );
-        string normalizedCity = ValidateRequired(city, MaxCityLegth, nameof(city));
-        string normalizedProvince = ValidateRequired(province, MaxProvinceLegth, nameof(province));
-        string normalizedPostalCode = ValidateRequired(
+        string newCity = DomainValidation.ValidateRequiredText(city, MaxCityLegth, nameof(city));
+        string newProvince = DomainValidation.ValidateRequiredText(
+            province,
+            MaxProvinceLegth,
+            nameof(province)
+        );
+        string newPostalCode = DomainValidation.ValidateRequiredText(
             postalCode,
             MaxPostalCodeLegth,
             nameof(postalCode)
         );
-        string? normalizedReference = ValidateOptional(
+        string? newReference = DomainValidation.ValidateOptionalText(
             reference,
             MaxReferenceLegth,
             nameof(reference)
         );
 
-        Street = normalizedStreet;
-        Number = normalizedNumber;
-        Apartment = normalizedApartament;
-        City = normalizedCity;
-        Province = normalizedProvince;
-        PostalCode = normalizedPostalCode;
-        Reference = normalizedReference;
+        Street = newStreet;
+        Number = newNumber;
+        Apartment = newApartment;
+        City = newCity;
+        Province = newProvince;
+        PostalCode = newPostalCode;
+        Reference = newReference;
     }
 }
