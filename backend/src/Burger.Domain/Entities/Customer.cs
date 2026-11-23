@@ -1,4 +1,5 @@
 using System.Net.Mail;
+using Burger.Domain.Common;
 
 namespace Burger.Domain.Entities;
 
@@ -22,12 +23,28 @@ public class Customer
 
     public Customer(string firstName, string lastName, string email, string phoneNumber)
     {
-        Id = Guid.NewGuid();
+        string newFirstName = DomainValidation.ValidateRequiredText(
+            firstName,
+            MaxFirstNameLength,
+            nameof(firstName)
+        );
+        string newLastName = DomainValidation.ValidateRequiredText(
+            lastName,
+            MaxLastNameLength,
+            nameof(lastName)
+        );
+        string newEmail = ValidateEmail(email);
+        string newPhoneNumber = DomainValidation.ValidateRequiredText(
+            phoneNumber,
+            MaxPhoneNumberLength,
+            nameof(phoneNumber)
+        );
 
-        FirstName = ValidateName(firstName, MaxFirstNameLength, nameof(firstName));
-        LastName = ValidateName(lastName, MaxLastNameLength, nameof(lastName));
-        Email = ValidateEmail(email);
-        PhoneNumber = NormalizePhoneNumber(phoneNumber);
+        Id = Guid.NewGuid();
+        FirstName = newFirstName;
+        LastName = newLastName;
+        Email = newEmail;
+        PhoneNumber = newPhoneNumber;
     }
 
     public void UpdateInformation(
@@ -37,28 +54,27 @@ public class Customer
         string phoneNumber
     )
     {
-        string normlizedFirstName = ValidateName(firstName, MaxEmailLength, nameof(firstName));
-        string normalizedLastName = ValidateName(lastName, MaxLastNameLength, nameof(lastName));
-        string normalizedEmail = ValidateEmail(email);
-        string normalizePhoneNumber = NormalizePhoneNumber(phoneNumber);
+        string newFirstName = DomainValidation.ValidateRequiredText(
+            firstName,
+            MaxFirstNameLength,
+            nameof(firstName)
+        );
+        string newLastName = DomainValidation.ValidateRequiredText(
+            lastName,
+            MaxLastNameLength,
+            nameof(lastName)
+        );
+        string newEmail = ValidateEmail(email);
+        string newPhoneNumber = DomainValidation.ValidateRequiredText(
+            phoneNumber,
+            MaxPhoneNumberLength,
+            nameof(phoneNumber)
+        );
 
-        FirstName = normlizedFirstName;
-        LastName = normalizedLastName;
-        Email = normalizedEmail;
-        PhoneNumber = normalizePhoneNumber;
-    }
-
-    private static string ValidateName(string name, int maxLength, string parameterName)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-            throw new ArgumentException("Name cannot be empty.", parameterName);
-
-        string normalizedName = name.Trim();
-
-        if (normalizedName.Length > maxLength)
-            throw new ArgumentException("Name is too long.", parameterName);
-
-        return normalizedName;
+        FirstName = newFirstName;
+        LastName = newLastName;
+        Email = newEmail;
+        PhoneNumber = newPhoneNumber;
     }
 
     private static string ValidateEmail(string email)
@@ -80,12 +96,6 @@ public class Customer
         }
 
         return normalizedEmail.ToLowerInvariant();
-    }
-
-    private static string NormalizePhoneNumber(string phoneNumber)
-    {
-        ValidatePhoneNumber(phoneNumber);
-        return phoneNumber.Trim();
     }
 
     private static void ValidatePhoneNumber(string phoneNumber)

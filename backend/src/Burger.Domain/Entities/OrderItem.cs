@@ -1,3 +1,5 @@
+using Burger.Domain.Common;
+
 namespace Burger.Domain.Entities;
 
 public class OrderItem
@@ -32,7 +34,11 @@ public class OrderItem
         OrderId = orderId;
         ProductId = productId;
 
-        ProductName = ValidateProductName(productName);
+        productName = DomainValidation.ValidateRequiredText(
+            productName,
+            MaxProductNameLegth,
+            nameof(productName)
+        );
         UnitPrice = ValidateUnitPrice(unitPrice);
         Quantity = ValidateQuantity(quantity);
     }
@@ -40,17 +46,6 @@ public class OrderItem
     public void UpdateQuantity(int quantity)
     {
         Quantity = ValidateQuantity(quantity);
-    }
-
-    private static string ValidateProductName(string productName)
-    {
-        if (string.IsNullOrWhiteSpace(productName))
-            throw new ArgumentException("Product name cannot be empty.", nameof(productName));
-        string normalizedName = productName.Trim();
-
-        if (normalizedName.Length > MaxProductNameLegth)
-            throw new ArgumentException("Product name is too long.", nameof(productName));
-        return normalizedName;
     }
 
     private static decimal ValidateUnitPrice(decimal unitPrice)
