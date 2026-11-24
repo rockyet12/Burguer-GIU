@@ -4,7 +4,7 @@ namespace Burger.Domain.Entities;
 
 public class OrderItem
 {
-    private const int MaxProductNameLegth = 120;
+    private const int MaxProductNameLength = 120;
 
     public Guid Id { get; private set; }
     public Guid OrderId { get; private set; }
@@ -34,9 +34,9 @@ public class OrderItem
         OrderId = orderId;
         ProductId = productId;
 
-        productName = DomainValidation.ValidateRequiredText(
+        ProductName = DomainValidation.ValidateRequiredText(
             productName,
-            MaxProductNameLegth,
+            MaxProductNameLength,
             nameof(productName)
         );
         UnitPrice = ValidateUnitPrice(unitPrice);
