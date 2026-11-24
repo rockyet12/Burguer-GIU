@@ -1,3 +1,4 @@
+using System.Security.Cryptography.X509Certificates;
 using Burger.Domain.Enums;
 
 namespace Burger.Domain.Entities;
@@ -84,12 +85,12 @@ public class Order
 
     public void Cancel()
     {
-        if (Status == OrderStatus.Completed)
-            throw new InvalidOperationException("Completed orders cannot be cancelled.");
-
-        if (Status == OrderStatus.Cancelled)
-            throw new InvalidOperationException("Order is already cancelled.");
-
+        if (Status != OrderStatus.Pending && Status != OrderStatus.Confirmed)
+        {
+            throw new InvalidOperationException(
+                "Only pending or confirmed orders can be cancelled."
+            );
+        }
         Status = OrderStatus.Cancelled;
     }
 
@@ -107,6 +108,17 @@ public class Order
             throw new InvalidOperationException("Only preparing orders can be marked as ready.");
 
         Status = OrderStatus.Ready;
+    }
+
+    public void MarkOutForDelivery()
+    {
+        if (Status != OrderStatus.Ready)
+        {
+            throw new InvalidOperationException(
+                "Only ready orders can be ,marked as out for delivery"
+            );
+        }
+        Status = OrderStatus.OutForDelivery;
     }
 
     public void Complete()
