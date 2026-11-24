@@ -43,7 +43,8 @@ public class Order
         var existingItem = _items.FirstOrDefault(item => item.ProductId == productId);
         if (existingItem is not null)
         {
-            existingItem.UpdateQuantity(existingItem.Quantity + quantity);
+            int newQuantity = checked(existingItem.Quantity + quantity);
+            existingItem.UpdateQuantity(newQuantity);
             return;
         }
 
