@@ -35,21 +35,23 @@ public class Order
     public void AddItem(Guid productId, string productName, decimal unitPrice, int quantity)
     {
         EnsurePending();
-
+        if (productId == Guid.Empty)
+            throw new ArgumentException("Product ID cannot be empty.", nameof(productId));
         if (quantity <= 0)
             throw new ArgumentOutOfRangeException("Quantity must be greater than zero.");
-        var existingItem = _items.FirstOrDefault(item => item.ProductId == productId);
 
+        var existingItem = _items.FirstOrDefault(item => item.ProductId == productId);
         if (existingItem is not null)
         {
             existingItem.UpdateQuantity(existingItem.Quantity + quantity);
             return;
         }
+
         var item = new OrderItem(Id, productId, productName, unitPrice, quantity);
         _items.Add(item);
     }
 
-    public void UpdateItemQuantity(Guid orderItemId, int quantity)
+    public void UpdateItmQuantity(Guid orderItemId, int quantity)
     {
         EnsurePending();
 
