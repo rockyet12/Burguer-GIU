@@ -52,6 +52,11 @@ public class OrderItem
     {
         if (unitPrice <= 0)
             throw new ArgumentException("Unit price must be greater than zero.", nameof(unitPrice));
+        if (decimal.Round(unitPrice, 2) != unitPrice)
+            throw new ArgumentException(
+                "Unit price cannot have more than two decimal places.",
+                nameof(unitPrice)
+            );
         return unitPrice;
     }
 
