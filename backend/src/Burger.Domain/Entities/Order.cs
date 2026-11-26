@@ -1,4 +1,3 @@
-using System.Security.Cryptography.X509Certificates;
 using Burger.Domain.Enums;
 
 namespace Burger.Domain.Entities;
@@ -38,7 +37,10 @@ public class Order
         if (productId == Guid.Empty)
             throw new ArgumentException("Product ID cannot be empty.", nameof(productId));
         if (quantity <= 0)
-            throw new ArgumentOutOfRangeException("Quantity must be greater than zero.");
+            throw new ArgumentOutOfRangeException(
+                nameof(quantity),
+                "Quantity must be greater than zero."
+            );
 
         var existingItem = _items.FirstOrDefault(item => item.ProductId == productId);
         if (existingItem is not null)
@@ -52,7 +54,7 @@ public class Order
         _items.Add(item);
     }
 
-    public void UpdateItmQuantity(Guid orderItemId, int quantity)
+    public void UpdateItemQuantity(Guid orderItemId, int quantity)
     {
         EnsurePending();
 
@@ -113,12 +115,12 @@ public class Order
         Status = OrderStatus.Ready;
     }
 
-    public void MarkOutForDelivery()
+    public void MarkAsOutForDelivery()
     {
         if (Status != OrderStatus.Ready)
         {
             throw new InvalidOperationException(
-                "Only ready orders can be ,marked as out for delivery"
+                "Only ready orders can be marked as out for delivery"
             );
         }
         Status = OrderStatus.OutForDelivery;
